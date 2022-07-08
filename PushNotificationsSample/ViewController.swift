@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import UserNotifications
 
 class ViewController: UIViewController {
 
@@ -14,6 +15,32 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
 
-
+    func requestPushNotificationsPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings {[weak self] settings in
+            print("Notification settings: \(settings)")
+            
+            if settings.authorizationStatus != .authorized {
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound], completionHandler: { granted, _ in
+                    print("Permission granted: \(granted)")
+                    guard granted else { return }
+                    self?.registerForPushNotifications()
+                })
+            } else {
+                self?.registerForPushNotifications()
+            }
+          }
+    }
+    
+    func registerForPushNotifications() {
+        DispatchQueue.main.async {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+    }
+    
+    @IBAction func signUp_Clicked(_ sender: UIButton) {
+        self.requestPushNotificationsPermission()
+        print("Button clicked")
+    }
+    
 }
 
